@@ -34,7 +34,6 @@ frame_height = state.shape[0]
 frame_width = state.shape[1]
 channels = state.shape[2]
 n_actions = len(SIMPLE_MOVEMENT)
-# n_actions = len(COMPLEX_MOVEMENT)
 
 # This refers to the number of actions we want to look back at (refer to the end of my blog)
 timesteps = 4
@@ -56,7 +55,7 @@ sess.run(tf.global_variables_initializer())
 print('or here')
 
 # Define how many episodes we want to run it for
-total_episodes = 200
+total_episodes = 5
 episode_counter = 0
 done = False
 
@@ -71,7 +70,7 @@ state_values = []
 rewards = []
 
 # You should probably increase the number of epochs
-epochs = 1
+epochs = 2
 batch_size = 64
 
 # Some performance stats to keep track of
