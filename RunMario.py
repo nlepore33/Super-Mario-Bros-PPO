@@ -166,6 +166,6 @@ while episode_counter < total_episodes:
     max_position_tracker.append(stage_max_position)    
 
     # This is to render the actual game (Comment this out for a speed boost in training)
-    env.render()
+    # env.render()
 
 env.close()
