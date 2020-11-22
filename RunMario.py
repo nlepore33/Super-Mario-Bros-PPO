@@ -1,9 +1,13 @@
 # Load in the gym
-from nes_py.wrappers import BinarySpaceToDiscreteSpaceEnv
+# from nes_py.wrappers import BinarySpaceToDiscreteSpaceEnv
+from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-env = gym_super_mario_bros.make('SuperMarioBros-v0')
-env = BinarySpaceToDiscreteSpaceEnv(env, SIMPLE_MOVEMENT)
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT
+env = gym_super_mario_bros.make('SuperMarioBros-v3')
+# env = gym_super_mario_bros.make('SuperMarioBros-1-2-v0')
+# env = BinarySpaceToDiscreteSpaceEnv(env, SIMPLE_MOVEMENT)
+env = JoypadSpace(env, SIMPLE_MOVEMENT)
+# env = JoypadSpace(env, COMPLEX_MOVEMENT)
 
 # Reset the environment to begin playing/training
 state = env.reset()
@@ -11,7 +15,9 @@ state = env.reset()
 # Load in some libraries that we will need
 import copy
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
 from ModelPPO import PPO
 
 # We are defining the function to get the Generalized Advantage Estimation
@@ -28,6 +34,7 @@ frame_height = state.shape[0]
 frame_width = state.shape[1]
 channels = state.shape[2]
 n_actions = len(SIMPLE_MOVEMENT)
+# n_actions = len(COMPLEX_MOVEMENT)
 
 # This refers to the number of actions we want to look back at (refer to the end of my blog)
 timesteps = 4
@@ -38,11 +45,15 @@ learning_rate = 5 * 10e-5
 GAMMA = 0.99
 LAMBDA = 0.95
 
+print('here?')
+
 # Initialize the model
 tf.reset_default_graph()
 sess = tf.Session()
 model = PPO(sess, frame_height, frame_width, channels, n_actions, timesteps, epsilon, learning_rate, GAMMA, LAMBDA)
 sess.run(tf.global_variables_initializer())
+
+print('or here')
 
 # Define how many episodes we want to run it for
 total_episodes = 200
@@ -76,6 +87,7 @@ while episode_counter < total_episodes:
         score = true_max_position + max_position_tracker[-1]
         
         next_state_values = state_values[1:] + [0]        
+        print('get_gaes')
         GAEs, deltas = get_gaes(rewards, state_values, next_state_values, GAMMA, LAMBDA)
         
         # Convert Lists to Numpy Arrays for Training
@@ -87,9 +99,11 @@ while episode_counter < total_episodes:
         GAEs = np.array(GAEs)
         
         # Update the old model parameters to start off training (since we need to calculate the ratio between new and old)
+        print('model update')
         model.update()
         
         # Train the Model
+        print('model train')
         model.train(states, actions, GAEs, rewards, next_state_values, prev_actions_list, epochs, batch_size)
 
         # Append most recent score to the performance tracker and reinitialize everything for the next episode

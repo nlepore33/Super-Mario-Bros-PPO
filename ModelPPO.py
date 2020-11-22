@@ -1,5 +1,7 @@
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
 
 class PPO():
     def __init__(self, sess, image_height, image_width, image_channels, output_dimension, timesteps, _clip_value, _lr, _gamma, _lambda):
